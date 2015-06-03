@@ -22,3 +22,6 @@ ruby twitter_search.rb
 ```
 
 The app should be available at [http://127.0.0.1:4567]!
+
+# Justification
+This repo was built for the purpose of a talk on single page javascript caching at Exchange.JS in Edmonton on June 4 2015 to be given by Ben Zittlau.
