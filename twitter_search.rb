@@ -8,9 +8,9 @@ get '/twitter_search' do
   erb :twitter_search
 end
 
-def twitter_request(url)
+def twitter_request(url, query = {})
   options = {
-    :query => {:q => params[:query]},
+    :query => query,
     :headers => {'Authorization' => "Bearer #{ENV['bearer']}"}
   }
 
@@ -18,7 +18,13 @@ def twitter_request(url)
 end
 
 get '/search' do
-  response = twitter_request('https://api.twitter.com/1.1/search/tweets.json')
+  response = twitter_request('https://api.twitter.com/1.1/search/tweets.json', {:q => params[:query]})
+
+  return response.body
+end
+
+get '/tweet' do
+  response = twitter_request('https://api.twitter.com/1.1/statuses/show.json', {:id => params[:id]})
 
   return response.body
 end

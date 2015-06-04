@@ -21,10 +21,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.9.3/lodash.js"></script>
     <script src="twitter_search.js"></script>
     <script id="tweet-template" type="text/x-handlebars-template">
-        <div class="col-lg-12">
-          <h4>{{ handle }}</h4>
-          <p class="alert alert-success">{{ body }}</p>
-        </div>
+      <div class="col-lg-12 tweet" data-id="{{ id }}">
+        <h4>{{ handle }}</h4>
+        <p class="alert alert-success">{{ body }}</p>
+      </div>
+    </script>
+
+    <script id="tweet-details-template" type="text/x-handlebars-template">
+      <div class="col-lg-12 alert alert-warning">
+        <p>Handle: {{ handle }}</p>
+        <p>Name:{{ name }}</p>
+        <p>Created At: {{ created_at}}</p>
+        <p>Location: {{ location}}</p>
+        <p>Body: {{ body }}</p>
+      </div>
     </script>
 
     <!-- Custom styles for this template -->
@@ -45,6 +55,10 @@
           </div>
         <p><button class="searchButton btn btn-lg btn-success" type="submit">Search</button></p>
         </form>
+        <small class="logger"></small>
+      </div>
+
+      <div class="row tweetDetails">
       </div>
 
       <div class="row tweets">
