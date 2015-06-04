@@ -25,6 +25,7 @@ clearTweetDetails = function() {
 
 handleSearchResponse = function(data) {
   clearTweets();
+  clearTweetDetails();
   _.forEach(data.statuses, function(tweet) {
     var handle = "@" + tweet.user.screen_name;
     var body = tweet.text;
@@ -85,7 +86,7 @@ $(document).ready(function() {
     var data = {id: tweet.data('id')}
 
     // Request the tweet from the API
-    $.getJSON('/tweet', data).done(handleTweetResponse);
+    TwitterCacher.getResource('/tweet', data, handleTweetResponse);
 
     return false;
   });
