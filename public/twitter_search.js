@@ -34,7 +34,7 @@ handleSearchResponse = function(data, cacheTweets) {
 
     if(cacheTweets) {
       key = '/tweet/' + JSON.stringify({id: id});
-      TwitterCache.inject(key, tweet);
+      TwitterCache.store(key, tweet);
     }
   });
 };
@@ -100,12 +100,13 @@ $(document).ready(function() {
 
 /* #################### CACHING CODE #################### */
 var TwitterCache = {
-  cache: {},
+  cache: localStorage,
   getResource: function(url, data, callback) {
     key = url + "/" + JSON.stringify(data);
-    if(this.cache[key]) {
+
+    if(this.fetch(key)) {
       log("[CACHE] Blocked ajax request for " + url);
-      callback(this.cache[key].payload, false);
+      callback(this.fetch(key), false);
     } else {
       $.getJSON(url, data).done(function(data) {
         TwitterCache.handleResponse(key, data, callback);
@@ -113,17 +114,23 @@ var TwitterCache = {
     }
   },
 
-  inject: function(key, payload) {
-    console.log("Caching " + key);
-    console.log(payload);
-    this.cache[key] = {
-      timestamp: Date.now,
-      payload: payload
+  fetch: function(key) {
+    if(this.cache[key]) {
+      return JSON.parse(this.cache[key]).payload;
+    } else {
+      return false;
     }
   },
 
+  store: function(key, payload) {
+    this.cache[key] = JSON.stringify({
+      timestamp: Date.now,
+      payload: payload
+    });
+  },
+
   handleResponse: function(key, data, callback) {
-    this.inject(key, data);
+    this.store(key, data);
 
     callback(data, true);
   }
