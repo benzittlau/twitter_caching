@@ -23,7 +23,7 @@ clearTweetDetails = function() {
   $('.tweetDetails').empty();
 }
 
-handleSearchResponse = function(data) {
+handleSearchResponse = function(data, cacheTweets) {
   clearTweets();
   clearTweetDetails();
   _.forEach(data.statuses, function(tweet) {
@@ -31,6 +31,11 @@ handleSearchResponse = function(data) {
     var body = tweet.text;
     var id = tweet.id_str;
     insertTweet({handle: handle, body: body, id: id});
+
+    if(cacheTweets) {
+      key = '/tweet/' + JSON.stringify({id: id});
+      TwitterCache.inject(key, tweet);
+    }
   });
 };
 
@@ -75,7 +80,7 @@ $(document).ready(function() {
     $('#twitterSearch').val('');
 
     // Request the tweets from the API
-    TwitterCacher.getResource('/search', data, handleSearchResponse);
+    TwitterCache.getResource('/search', data, handleSearchResponse);
 
     return false;
   });
@@ -86,7 +91,7 @@ $(document).ready(function() {
     var data = {id: tweet.data('id')}
 
     // Request the tweet from the API
-    TwitterCacher.getResource('/tweet', data, handleTweetResponse);
+    TwitterCache.getResource('/tweet', data, handleTweetResponse);
 
     return false;
   });
@@ -94,27 +99,33 @@ $(document).ready(function() {
 /* #################### END APPLICATION CODE #################### */
 
 /* #################### CACHING CODE #################### */
-var TwitterCacher = {
+var TwitterCache = {
   cache: {},
   getResource: function(url, data, callback) {
-    key = url + JSON.stringify(data);
+    key = url + "/" + JSON.stringify(data);
     if(this.cache[key]) {
       log("[CACHE] Blocked ajax request for " + url);
-      callback(this.cache[key].payload);
+      callback(this.cache[key].payload, false);
     } else {
       $.getJSON(url, data).done(function(data) {
-        TwitterCacher.handleResponse(key, data, callback);
+        TwitterCache.handleResponse(key, data, callback);
       });
     }
   },
 
-  handleResponse: function(key, data, callback) {
+  inject: function(key, payload) {
+    console.log("Caching " + key);
+    console.log(payload);
     this.cache[key] = {
       timestamp: Date.now,
-      payload: data
+      payload: payload
     }
+  },
 
-    callback(data);
+  handleResponse: function(key, data, callback) {
+    this.inject(key, data);
+
+    callback(data, true);
   }
 }
 /* #################### END CACHING CODE #################### */
