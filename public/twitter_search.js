@@ -77,7 +77,6 @@ $(document).ready(function() {
   $('#searchForm').on('submit', function() {
     // Get and clear the search term
     var data = {query: $('#twitterSearch').val()}
-    $('#twitterSearch').val('');
 
     // Request the tweets from the API
     TwitterCache.getResource('/search', data, handleSearchResponse);
@@ -101,6 +100,7 @@ $(document).ready(function() {
 /* #################### CACHING CODE #################### */
 var TwitterCache = {
   cache: localStorage,
+  ttl: 10000,
   getResource: function(url, data, callback) {
     key = url + "/" + JSON.stringify(data);
 
@@ -116,15 +116,18 @@ var TwitterCache = {
 
   fetch: function(key) {
     if(this.cache[key]) {
-      return JSON.parse(this.cache[key]).payload;
-    } else {
-      return false;
+      var object = JSON.parse(this.cache[key]);
+      if((Date.now() - object.timestamp) < this.ttl) {
+        return object.payload;
+      }
     }
+
+    return false;
   },
 
   store: function(key, payload) {
     this.cache[key] = JSON.stringify({
-      timestamp: Date.now,
+      timestamp: Date.now(),
       payload: payload
     });
   },
