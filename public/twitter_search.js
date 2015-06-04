@@ -74,7 +74,7 @@ $(document).ready(function() {
     $('#twitterSearch').val('');
 
     // Request the tweets from the API
-    $.getJSON('/search', data).done(handleSearchResponse);
+    TwitterCacher.getResource('/search', data, handleSearchResponse);
 
     return false;
   });
@@ -91,3 +91,29 @@ $(document).ready(function() {
   });
 });
 /* #################### END APPLICATION CODE #################### */
+
+/* #################### CACHING CODE #################### */
+var TwitterCacher = {
+  cache: {},
+  getResource: function(url, data, callback) {
+    key = url + JSON.stringify(data);
+    if(this.cache[key]) {
+      log("[CACHE] Blocked ajax request for " + url);
+      callback(this.cache[key].payload);
+    } else {
+      $.getJSON(url, data).done(function(data) {
+        TwitterCacher.handleResponse(key, data, callback);
+      });
+    }
+  },
+
+  handleResponse: function(key, data, callback) {
+    this.cache[key] = {
+      timestamp: Date.now,
+      payload: data
+    }
+
+    callback(data);
+  }
+}
+/* #################### END CACHING CODE #################### */
